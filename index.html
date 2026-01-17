@@ -696,4 +696,639 @@
         <i class="fas fa-arrow-up"></i> Scroll for more levels
     </div>
     
-    <!-- Con
+    <!-- Confetti Container -->
+    <div class="confetti-container" id="confettiContainer"></div>
+    
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="logo-mobile">
+            <i class="fas fa-brain"></i>
+            <span>BrainPro</span>
+        </div>
+        <div class="stats-mobile">
+            <div class="stat-item">
+                <div class="stat-value" id="headerLevel">1</div>
+                <div class="stat-label">Level</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="headerScore">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Container -->
+    <div class="mobile-container">
+        
+        <!-- Level Select Page -->
+        <div class="mobile-page active" id="levelSelectPage">
+            <div class="hero-mobile">
+                <h1>🧠 Brain Challenge Pro</h1>
+                <p>Test your mind with 100 levels of puzzles. Your progress is automatically saved!</p>
+            </div>
+            
+            <div class="progress-section-mobile">
+                <div class="progress-info">
+                    <span>Overall Progress</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar-mobile">
+                    <div class="progress-fill-mobile" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <!-- Continue Playing -->
+            <div class="continue-section" id="continueSection" style="display: none;">
+                <button class="continue-btn" onclick="continuePlaying()">
+                    <i class="fas fa-play-circle"></i>
+                    Continue Level <span id="continueLevel">1</span>
+                </button>
+            </div>
+            
+            <div class="levels-section-mobile">
+                <div class="section-title-mobile">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Select Level</span>
+                </div>
+                <div class="levels-grid-mobile" id="levelsGrid">
+                    <!-- Level cards will be generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Page -->
+        <div class="mobile-page" id="gamePage">
+            <div class="game-page-mobile">
+                <div class="level-header-mobile">
+                    <div class="level-badge-mobile" id="currentLevelBadge">1</div>
+                    <div class="level-title-mobile" id="levelTitle">Level 1</div>
+                    <div class="difficulty-mobile easy-mobile" id="levelDifficulty">EASY</div>
+                </div>
+                
+                <div class="question-card-mobile">
+                    <div class="question-text-mobile" id="questionText">
+                        What has keys but can't open locks?
+                    </div>
+                </div>
+                
+                <div class="options-grid-mobile" id="optionsGrid">
+                    <!-- Options will be loaded here -->
+                </div>
+                
+                <div class="feedback-container-mobile" id="feedbackContainer"></div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Game Controls -->
+    <div class="controls-mobile" id="gameControls" style="display: none;">
+        <button class="control-btn-mobile btn-back-mobile" onclick="backToLevelSelect()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <button class="control-btn-mobile btn-submit-mobile" id="submitBtn">
+            <i class="fas fa-check"></i> Submit
+        </button>
+    </div>
+    
+    <!-- Next Level Controls -->
+    <div class="controls-mobile" id="nextControls" style="display: none;">
+        <button class="control-btn-mobile btn-back-mobile" onclick="backToLevelSelect()">
+            <i class="fas fa-list"></i> Levels
+        </button>
+        <button class="control-btn-mobile btn-next-mobile" id="nextBtn" onclick="nextLevel()">
+            <i class="fas fa-forward"></i> Next
+        </button>
+    </div>
+
+    <script>
+        // Mobile Optimized Game with Auto-Save
+        
+        // Game State
+        const gameState = {
+            currentLevel: 1,
+            completedLevels: 0,
+            totalScore: 0,
+            streak: 0,
+            unlockedLevels: 1,
+            totalLevels: 100,
+            answers: {},
+            lastPlayedLevel: 1,
+            lastPlayedTime: null,
+            accuracy: 0
+        };
+
+        // DOM Elements
+        const elements = {
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            saveIndicator: document.getElementById('saveIndicator'),
+            swipeHint: document.getElementById('swipeHint'),
+            confettiContainer: document.getElementById('confettiContainer'),
+            levelSelectPage: document.getElementById('levelSelectPage'),
+            gamePage: document.getElementById('gamePage'),
+            headerLevel: document.getElementById('headerLevel'),
+            headerScore: document.getElementById('headerScore'),
+            progressPercent: document.getElementById('progressPercent'),
+            progressFill: document.getElementById('progressFill'),
+            continueSection: document.getElementById('continueSection'),
+            continueLevel: document.getElementById('continueLevel'),
+            levelsGrid: document.getElementById('levelsGrid'),
+            currentLevelBadge: document.getElementById('currentLevelBadge'),
+            levelTitle: document.getElementById('levelTitle'),
+            levelDifficulty: document.getElementById('levelDifficulty'),
+            questionText: document.getElementById('questionText'),
+            optionsGrid: document.getElementById('optionsGrid'),
+            feedbackContainer: document.getElementById('feedbackContainer'),
+            submitBtn: document.getElementById('submitBtn'),
+            nextBtn: document.getElementById('nextBtn'),
+            gameControls: document.getElementById('gameControls'),
+            nextControls: document.getElementById('nextControls')
+        };
+
+        // Questions Database
+        const questions = Array(100).fill().map((_, i) => ({
+            level: i + 1,
+            question: getRandomQuestion(i + 1),
+            options: getRandomOptions(i + 1),
+            correct: Math.floor(Math.random() * 4),
+            difficulty: i < 33 ? 'easy' : i < 66 ? 'medium' : 'hard'
+        }));
+
+        // Initialize Game
+        function initGame() {
+            // Load saved game
+            loadGameState();
+            
+            // Hide loading after 1 second
+            setTimeout(() => {
+                elements.loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    elements.loadingOverlay.style.display = 'none';
+                    
+                    // Show swipe hint on mobile
+                    if (window.innerWidth <= 768) {
+                        setTimeout(() => {
+                            elements.swipeHint.style.display = 'block';
+                            setTimeout(() => {
+                                elements.swipeHint.style.display = 'none';
+                            }, 3000);
+                        }, 1000);
+                    }
+                }, 500);
+            }, 1000);
+            
+            // Create level cards
+            createLevelCards();
+            updateUI();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Auto-save every 30 seconds
+            setInterval(autoSave, 30000);
+            
+            // Save when leaving page
+            window.addEventListener('beforeunload', autoSave);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) autoSave();
+            });
+        }
+
+        // Load game state
+        function loadGameState() {
+            try {
+                const saved = localStorage.getItem('brainChallengeProMobile');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    Object.assign(gameState, data);
+                    
+                    // Show continue button if progress exists
+                    if (gameState.completedLevels > 0 || gameState.lastPlayedLevel > 1) {
+                        elements.continueSection.style.display = 'block';
+                        elements.continueLevel.textContent = gameState.lastPlayedLevel;
+                    }
+                }
+            } catch (e) {
+                console.log('Starting fresh game');
+            }
+        }
+
+        // Save game state
+        function saveGameState() {
+            try {
+                gameState.lastPlayedTime = new Date().toISOString();
+                localStorage.setItem('brainChallengeProMobile', JSON.stringify(gameState));
+                return true;
+            } catch (e) {
+                console.error('Save failed:', e);
+                return false;
+            }
+        }
+
+        // Auto-save
+        function autoSave() {
+            if (saveGameState()) {
+                showSaveIndicator();
+            }
+        }
+
+        // Show save indicator
+        function showSaveIndicator() {
+            elements.saveIndicator.style.display = 'block';
+            setTimeout(() => {
+                elements.saveIndicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Submit button with touch feedback
+            elements.submitBtn.addEventListener('click', checkAnswer);
+            
+            // Touch feedback for buttons
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.classList.contains('control-btn-mobile') || 
+                    e.target.classList.contains('option-card-mobile') ||
+                    e.target.classList.contains('level-card-mobile')) {
+                    e.target.style.transform = 'scale(0.95)';
+                }
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                if (e.target.classList.contains('control-btn-mobile') || 
+                    e.target.classList.contains('option-card-mobile') ||
+                    e.target.classList.contains('level-card-mobile')) {
+                    setTimeout(() => {
+                        e.target.style.transform = 'scale(1)';
+                    }, 150);
+                }
+            });
+            
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (e) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+        }
+
+        // Create level cards
+        function createLevelCards() {
+            elements.levelsGrid.innerHTML = '';
+            
+            for (let i = 1; i <= gameState.totalLevels; i++) {
+                const levelCard = document.createElement('div');
+                levelCard.className = `level-card-mobile ${i <= gameState.unlockedLevels ? 'unlocked' : 'locked'} ${i === gameState.lastPlayedLevel ? 'current' : ''} ${gameState.answers[i]?.correct ? 'completed' : ''}`;
+                
+                levelCard.innerHTML = `
+                    <div class="level-number-mobile">${i}</div>
+                    <div class="level-status-mobile">
+                        ${gameState.answers[i]?.correct ? '✓' : (i === gameState.lastPlayedLevel ? 'Now' : '')}
+                    </div>
+                    ${i > gameState.unlockedLevels ? '<i class="fas fa-lock lock-icon-mobile"></i>' : ''}
+                `;
+                
+                if (i <= gameState.unlockedLevels) {
+                    levelCard.addEventListener('click', () => openLevel(i));
+                }
+                
+                elements.levelsGrid.appendChild(levelCard);
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update header
+            elements.headerLevel.textContent = gameState.currentLevel;
+            elements.headerScore.textContent = gameState.totalScore;
+            
+            // Update progress
+            const progress = (gameState.completedLevels / gameState.totalLevels) * 100;
+            elements.progressPercent.textContent = `${Math.round(progress)}%`;
+            elements.progressFill.style.width = `${progress}%`;
+            
+            // Update game page
+            elements.currentLevelBadge.textContent = gameState.currentLevel;
+            elements.levelTitle.textContent = `Level ${gameState.currentLevel}`;
+        }
+
+        // Continue playing
+        function continuePlaying() {
+            openLevel(gameState.lastPlayedLevel);
+        }
+
+        // Open level
+        function openLevel(level) {
+            if (level <= gameState.unlockedLevels) {
+                gameState.currentLevel = level;
+                gameState.lastPlayedLevel = level;
+                
+                // Switch pages
+                elements.levelSelectPage.classList.remove('active');
+                elements.gamePage.classList.add('active');
+                elements.gameControls.style.display = 'flex';
+                elements.nextControls.style.display = 'none';
+                
+                // Load question
+                loadQuestion();
+                updateUI();
+                
+                // Auto-save
+                autoSave();
+            }
+        }
+
+        // Load question
+        function loadQuestion() {
+            const question = questions[gameState.currentLevel - 1];
+            
+            // Set question
+            elements.questionText.textContent = question.question;
+            
+            // Set difficulty
+            elements.levelDifficulty.className = `difficulty-mobile ${question.difficulty}-mobile`;
+            elements.levelDifficulty.textContent = question.difficulty.toUpperCase();
+            
+            // Clear options
+            elements.optionsGrid.innerHTML = '';
+            
+            // Create options
+            const letters = ['A', 'B', 'C', 'D'];
+            question.options.forEach((option, index) => {
+                const optionCard = document.createElement('div');
+                optionCard.className = 'option-card-mobile';
+                optionCard.innerHTML = `
+                    <div class="option-letter-mobile">${letters[index]}</div>
+                    <div class="option-text-mobile">${option}</div>
+                `;
+                
+                optionCard.addEventListener('click', () => selectOption(index));
+                elements.optionsGrid.appendChild(optionCard);
+            });
+            
+            // Reset feedback
+            elements.feedbackContainer.innerHTML = '';
+            
+            // Reset buttons
+            elements.submitBtn.disabled = true;
+        }
+
+        // Select option
+        function selectOption(index) {
+            // Remove selection
+            document.querySelectorAll('.option-card-mobile').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection
+            document.querySelectorAll('.option-card-mobile')[index].classList.add('selected');
+            
+            // Enable submit
+            elements.submitBtn.disabled = false;
+        }
+
+        // Check answer
+        function checkAnswer() {
+            const selectedCard = document.querySelector('.option-card-mobile.selected');
+            if (!selectedCard) return;
+            
+            const selectedIndex = Array.from(document.querySelectorAll('.option-card-mobile')).indexOf(selectedCard);
+            const question = questions[gameState.currentLevel - 1];
+            const isCorrect = selectedIndex === question.correct;
+            
+            // Disable all options
+            document.querySelectorAll('.option-card-mobile').forEach(card => {
+                card.style.pointerEvents = 'none';
+            });
+            
+            // Mark correct/wrong
+            document.querySelectorAll('.option-card-mobile').forEach((card, index) => {
+                if (index === question.correct) {
+                    card.classList.add('correct');
+                } else if (index === selectedIndex && !isCorrect) {
+                    card.classList.add('wrong');
+                }
+            });
+            
+            // Show feedback
+            const feedback = document.createElement('div');
+            feedback.className = `feedback-mobile ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            if (isCorrect) {
+                feedback.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <div>Correct! +100 Points</div>
+                `;
+                
+                // Update game state
+                gameState.completedLevels++;
+                gameState.totalScore += 100;
+                gameState.streak++;
+                
+                // Unlock next level
+                if (gameState.currentLevel === gameState.unlockedLevels && gameState.unlockedLevels < gameState.totalLevels) {
+                    gameState.unlockedLevels++;
+                }
+                
+                // Save answer
+                gameState.answers[gameState.currentLevel] = {
+                    correct: true,
+                    answer: selectedIndex,
+                    time: new Date().toISOString()
+                };
+                
+                // Update UI
+                updateUI();
+                createLevelCards();
+                
+                // Show next controls
+                setTimeout(() => {
+                    elements.gameControls.style.display = 'none';
+                    elements.nextControls.style.display = 'flex';
+                }, 1000);
+                
+                // Celebration
+                createConfetti(50);
+                
+            } else {
+                feedback.innerHTML = `
+                    <i class="fas fa-times-circle"></i>
+                    <div>Wrong! Correct: ${question.options[question.correct]}</div>
+                `;
+                gameState.streak = 0;
+                
+                gameState.answers[gameState.currentLevel] = {
+                    correct: false,
+                    answer: selectedIndex,
+                    time: new Date().toISOString()
+                };
+            }
+            
+            elements.feedbackContainer.innerHTML = '';
+            elements.feedbackContainer.appendChild(feedback);
+            
+            // Disable submit
+            elements.submitBtn.disabled = true;
+            
+            // Auto-save
+            autoSave();
+        }
+
+        // Next level
+        function nextLevel() {
+            if (gameState.currentLevel < gameState.totalLevels) {
+                gameState.currentLevel++;
+                gameState.lastPlayedLevel = gameState.currentLevel;
+                loadQuestion();
+                updateUI();
+                
+                elements.gameControls.style.display = 'flex';
+                elements.nextControls.style.display = 'none';
+                
+                autoSave();
+            } else {
+                backToLevelSelect();
+            }
+        }
+
+        // Back to level select
+        function backToLevelSelect() {
+            elements.gamePage.classList.remove('active');
+            elements.levelSelectPage.classList.add('active');
+            elements.gameControls.style.display = 'none';
+            elements.nextControls.style.display = 'none';
+            
+            updateUI();
+            createLevelCards();
+            autoSave();
+        }
+
+        // Create confetti
+        function createConfetti(count) {
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = [
+                    '#7B68EE', '#00D4FF', '#FF6B8B', '#00FF9D', '#FFD166'
+                ][Math.floor(Math.random() * 5)];
+                confetti.style.borderRadius = '50%';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-20px';
+                confetti.style.zIndex = '9999';
+                confetti.style.pointerEvents = 'none';
+                
+                elements.confettiContainer.appendChild(confetti);
+                
+                // Animate
+                confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 2000 + 1000,
+                    easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+                }).onfinish = () => {
+                    confetti.remove();
+                };
+            }
+        }
+
+        // Random question generator
+        function getRandomQuestion(level) {
+            const questions = [
+                `Level ${level}: What has keys but can't open locks?`,
+                `Level ${level}: I speak without a mouth and hear without ears. What am I?`,
+                `Level ${level}: The more you take, the more you leave behind. What am I?`,
+                `Level ${level}: What has cities but no houses, forests but no trees?`,
+                `Level ${level}: What comes once in a minute, twice in a moment, but never in a thousand years?`,
+                `Level ${level}: What has a head, a tail, is brown, and has no legs?`,
+                `Level ${level}: What can travel around the world while staying in a corner?`,
+                `Level ${level}: What has words but never speaks?`,
+                `Level ${level}: What has a bed but never sleeps?`,
+                `Level ${level}: What has hands but can't clap?`
+            ];
+            return questions[level % questions.length];
+        }
+
+        // Random options generator
+        function getRandomOptions(level) {
+            const options = [
+                ["A piano", "A map", "A password", "A door"],
+                ["An echo", "A shadow", "A thought", "Music"],
+                ["Footsteps", "Memories", "Breath", "Time"],
+                ["A map", "A book", "A dream", "A painting"],
+                ["The letter M", "Time", "Silence", "Light"],
+                ["A penny", "A snake", "A worm", "A stick"],
+                ["A stamp", "A plane", "A thought", "Light"],
+                ["A book", "A sign", "A letter", "All of these"],
+                ["A river", "A hospital", "A garden", "A book"],
+                ["A clock", "A statue", "A tree", "A robot"]
+            ];
+            return options[level % options.length];
+        }
+
+        // Reset game
+        function resetGame() {
+            if (confirm('Reset all progress?')) {
+                localStorage.removeItem('brainChallengeProMobile');
+                location.reload();
+            }
+        }
+
+        // Add reset button (hidden for users)
+        document.addEventListener('DOMContentLoaded', () => {
+            const resetBtn = document.createElement('button');
+            resetBtn.innerHTML = '🔄';
+            resetBtn.style.position = 'fixed';
+            resetBtn.style.bottom = '100px';
+            resetBtn.style.right = '15px';
+            resetBtn.style.width = '40px';
+            resetBtn.style.height = '40px';
+            resetBtn.style.borderRadius = '50%';
+            resetBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+            resetBtn.style.backdropFilter = 'blur(10px)';
+            resetBtn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+            resetBtn.style.color = 'white';
+            resetBtn.style.cursor = 'pointer';
+            resetBtn.style.zIndex = '999';
+            resetBtn.style.display = 'flex';
+            resetBtn.style.alignItems = 'center';
+            resetBtn.style.justifyContent = 'center';
+            resetBtn.style.fontSize = '1rem';
+            resetBtn.onclick = resetGame;
+            resetBtn.title = 'Reset Game';
+            
+            // Only show in development
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                document.body.appendChild(resetBtn);
+            }
+        });
+
+        // Handle orientation change
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+
+        // Prevent pull-to-refresh
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === document.body || e.target === document.documentElement) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Initialize game
+        window.addEventListener('DOMContentLoaded', initGame);
+        
+        // Make functions globally available
+        window.continuePlaying = continuePlaying;
+        window.backToLevelSelect = backToLevelSelect;
+        window.nextLevel = nextLevel;
+    </script>
+</body>
+</html>
