@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🧠 Brain Challenge Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Mobile First Design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary: #7B68EE;
+            --secondary: #00D4FF;
+            --accent: #FF6B8B;
+            --success: #00FF9D;
+            --warning: #FFD166;
+            --dark: #0F0F23;
+            --glass: rgba(255, 255, 255, 0.08);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        
+        /* Safe Area Support */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(env(safe-area-inset-left), 15px);
+                padding-right: max(env(safe-area-inset-right), 15px);
+            }
+        }
+        
+        /* Mobile Header */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-mobile {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stats-mobile {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+        
+        /* Main Container */
+        .mobile-container {
+            max-width: 100%;
+            margin-top: 70px;
+            padding: 20px 15px 100px;
+            min-height: calc(100vh - 70px);
+        }
+        
+        /* Page System */
+        .mobile-page {
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .mobile-page.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Hero Section - Mobile */
+        .hero-mobile {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .hero-mobile h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .hero-mobile p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+        
+        /* Progress Section */
+        .progress-section-mobile {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar-mobile {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill-mobile {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* Continue Button */
+        .continue-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .continue-btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 18px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            box-shadow: 0 10px 20px rgba(123, 104, 238, 0.2);
+            transition: transform 0.2s;
+        }
+        
+        .continue-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Levels Grid - Mobile Optimized */
+        .levels-section-mobile {
+            margin-top: 30px;
+        }
+        
+        .section-title-mobile {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+        
+        .levels-grid-mobile {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 400px) {
+            .levels-grid-mobile {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        
+        @media (min-width: 500px) {
+            .levels-grid-mobile {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .levels-grid-mobile {
+                grid-template-columns: repeat(8, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        .level-card-mobile {
+            aspect-ratio: 1;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .level-card-mobile.unlocked {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .level-card-mobile.current {
+            border-color: var(--warning);
+            box-shadow: 0 0 20px rgba(255, 209, 102, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .level-card-mobile.completed {
+            border-color: var(--success);
+        }
+        
+        .level-card-mobile.locked {
+            background: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .level-card-mobile:active:not(.locked) {
+            transform: scale(0.95);
+        }
+        
+        .level-number-mobile {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .level-status-mobile {
+            position: absolute;
+            bottom: 8px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .lock-icon-mobile {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Game Page - Mobile */
+        .game-page-mobile {
+            width: 100%;
+        }
+        
+        /* Level Header */
+        .level-header-mobile {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .level-badge-mobile {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 25px rgba(123, 104, 238, 0.3);
+        }
+        
+        .level-title-mobile {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .difficulty-mobile {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .easy-mobile { background: rgba(0, 255, 157, 0.2); color: var(--success); }
+        .medium-mobile { background: rgba(255, 209, 102, 0.2); color: var(--warning); }
+        .hard-mobile { background: rgba(255, 107, 139, 0.2); color: var(--accent); }
+        
+        /* Question Card */
+        .question-card-mobile {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .question-card-mobile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .question-text-mobile {
+            font-size: 1.2rem;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        /* Options - Mobile Touch Friendly */
+        .options-grid-mobile {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option-card-mobile {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-card-mobile:active {
+            transform: scale(0.98);
+        }
+        
+        .option-card-mobile.selected {
+            background: rgba(0, 255, 157, 0.15);
+            border-color: var(--success);
+        }
+        
+        .option-card-mobile.correct {
+            background: rgba(0, 255, 157, 0.2);
+            border-color: var(--success);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+        
+        .option-card-mobile.wrong {
+            background: rgba(255, 107, 139, 0.15);
+            border-color: var(--accent);
+            opacity: 0.7;
+        }
+        
+        .option-letter-mobile {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: white;
+            box-shadow: 0 4px 10px rgba(123, 104, 238, 0.3);
+        }
+        
+        .option-text-mobile {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            padding-left: 10px;
+            padding-top: 5px;
+        }
+        
+        /* Feedback */
+        .feedback-container-mobile {
+            text-align: center;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+        
+        .feedback-mobile {
+            display: inline-block;
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            animation: feedbackPop 0.3s ease-out;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+        
+        .feedback-mobile.correct {
+            background: rgba(0, 255, 157, 0.15);
+            color: var(--success);
+            border-color: var(--success);
+        }
+        
+        .feedback-mobile.incorrect {
+            background: rgba(255, 107, 139, 0.15);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        @keyframes feedbackPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Controls - Bottom Fixed for Mobile */
+        .controls-mobile {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .control-btn-mobile {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .control-btn-mobile:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-submit-mobile {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 5px 15px rgba(123, 104, 238, 0.2);
+        }
+        
+        .btn-next-mobile {
+            background: linear-gradient(90deg, var(--success), #00D4A3);
+            color: black;
+            box-shadow: 0 5px 15px rgba(0, 255, 157, 0.2);
+        }
+        
+        .btn-back-mobile {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-btn-mobile:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Save Indicator */
+        .save-indicator {
+            position: fixed;
+            top: 70px;
+            right: 15px;
+            background: var(--success);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: none;
+            z-index: 1001;
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 15, 35, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Swipe Hint */
+        .swipe-hint {
+            position: fixed;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            animation: bounce 2s infinite;
+            display: none;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Confetti */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 360px) {
+            .mobile-container {
+                padding: 15px 10px 90px;
+            }
+            
+            .mobile-header {
+                padding: 12px 15px;
+            }
+            
+            .hero-mobile h1 {
+                font-size: 1.8rem;
+            }
+            
+            .levels-grid-mobile {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .question-text-mobile {
+                font-size: 1.1rem;
+            }
+            
+            .option-text-mobile {
+                font-size: 1rem;
+            }
+            
+            .controls-mobile {
+                padding: 12px 15px;
+            }
+        }
+        
+        @media (min-height: 700px) {
+            .mobile-container {
+                padding-bottom: 120px;
+            }
+            
+            .controls-mobile {
+                padding: 20px 15px;
+            }
+        }
+        
+        /* Prevent text selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Prevent pull-to-refresh */
+        body {
+            overscroll-behavior-y: contain;
+        }
+    </style>
+</head>
+<body class="no-select">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="color: var(--secondary); font-size: 1rem;">Loading Brain Challenge...</div>
+    </div>
+    
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">✓ Game Saved</div>
+    
+    <!-- Swipe Hint -->
+    <div class="swipe-hint" id="swipeHint">
+        <i class="fas fa-arrow-up"></i> Scroll for more levels
+    </div>
+    
+    <!-- Con
